@@ -178,14 +178,14 @@ trait Base
 
 	private function doTransform(mixed $value, Context $context): mixed
 	{
-		if ($context->isPartial) {
+		if ($context->isPartial || !$this->transforms) {
 			return $value;
 		}
 
-		$isOk = $context->createChecker();
+		$errorCount = count($context->errors);
 		foreach ($this->transforms as $handler) {
 			$value = $handler($value, $context);
-			if (!$isOk()) {
+			if ($errorCount !== count($context->errors)) {
 				return null;
 			}
 		}

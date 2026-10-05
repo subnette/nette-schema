@@ -13,7 +13,7 @@ use Nette\Schema\Helpers;
 use Nette\Schema\Kind;
 use Nette\Schema\MergeMode;
 use Nette\Schema\Schema;
-use function array_key_exists, is_array, is_object, strval;
+use function array_key_exists, count, is_array, is_object, strval;
 
 
 class Structure implements Schema
@@ -203,7 +203,7 @@ class Structure implements Schema
 		$value = $this->coerce($value);
 		$this->doDeprecation($context);
 
-		$isOk = $context->createChecker();
+		$errorCount = count($context->errors);
 		if (!is_array($value)) {
 			$context->addError(
 				'The %label% %path% expects to be array, %value% given.',
@@ -212,10 +212,10 @@ class Structure implements Schema
 			);
 		}
 
-		$isOk() && Helpers::validateRange($value, $this->range, $context);
-		$isOk() && $this->validateItems($value, $context);
-		$isOk() && $value = $this->doTransform($value, $context);
-		return $isOk() ? $value : null;
+		$errorCount === count($context->errors) && Helpers::validateRange($value, $this->range, $context);
+		$errorCount === count($context->errors) && $this->validateItems($value, $context);
+		$errorCount === count($context->errors) && $value = $this->doTransform($value, $context);
+		return $errorCount === count($context->errors) ? $value : null;
 	}
 
 

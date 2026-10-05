@@ -231,11 +231,11 @@ class Type implements Schema
 		$value = $this->coerce($value);
 		$this->doDeprecation($context);
 
-		$isOk = $context->createChecker();
+		$errorCount = count($context->errors);
 		$value = $this->validate($value, $context);
-		$isOk() && $value !== null && $value = $this->mergeDefault($value);
-		$isOk() && $value = $this->doTransform($value, $context);
-		if (!$isOk()) {
+		$errorCount === count($context->errors) && $value !== null && $value = $this->mergeDefault($value);
+		$errorCount === count($context->errors) && $value = $this->doTransform($value, $context);
+		if ($errorCount !== count($context->errors)) {
 			return null;
 		}
 
